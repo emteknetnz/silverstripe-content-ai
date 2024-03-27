@@ -1,0 +1,26 @@
+{
+    "name": "emteknetnz/silverstripe-content-ai",
+    "type": "silverstripe-vendormodule",
+    "description": "Content AI for Silverstripe",
+    "license": "MIT",
+    "keywords": [
+        "silverstripe",
+        "ai"
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "silverstripe/framework": "^5",
+        "silverstripe/cms": "^5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "emteknetnz\\ContentAI\\": "src/",
+            "emteknetnz\\ContentAI\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
