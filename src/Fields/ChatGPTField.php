@@ -1,10 +1,13 @@
 <?php
 
+namespace emteknetnz\ContentAI\Fields;
+
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
-use SilverStripe\View\Requirements;
 use emteknetnz\ContentAI\Services\ChatGPTService;
 use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\FormField;
+use SilverStripe\View\Requirements;
 
 class ChatGPTField extends TextareaField
 {
@@ -12,9 +15,17 @@ class ChatGPTField extends TextareaField
         'query'
     ];
 
+    protected $schemaComponent = 'ChatGPTField';
+
+    // probably dont' need this
+    protected $schemaDataType = FormField::SCHEMA_DATA_TYPE_CUSTOM;
+
+    // or this
+    protected $inputType = 'hidden';
+
     public function Field($properties = [])
     {
-        Requirements::javascript('emteknetnz/silverstripe-content-ai:client/js/chatgpt-field.js');
+        Requirements::javascript('emteknetnz/silverstripe-content-ai:client/js/bundle.js');
         return parent::Field($properties);
     }
 

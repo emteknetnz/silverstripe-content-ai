@@ -2,14 +2,13 @@
 
 namespace emteknetnz\ContentAI\Extensions;
 
-use ChatGPTField;
 use League\HTMLToMarkdown\HtmlConverter;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextareaField;
 use emteknetnz\ContentAI\Services\ChatGPTService;
-use SilverStripe\Forms\LiteralField;
+use emteknetnz\ContentAI\Fields\ChatGPTField;
 
 class SiteTreeExtension extends Extension
 {
