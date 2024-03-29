@@ -17,11 +17,11 @@ const config = [
       },
     })
     .getConfig(),
-  // new CssWebpackConfig('css', PATHS)
-  //   .setEntry({
-  //     bundle: `${PATHS.SRC}/styles/bundle.scss`,
-  //   })
-  //   .getConfig(),
+  new CssWebpackConfig('css', PATHS)
+    .setEntry({
+      bundle: `${PATHS.SRC}/styles/bundle.scss`,
+    })
+    .getConfig(),
 ];
 
 // Use WEBPACK_CHILD=js or WEBPACK_CHILD=css env var to run a single config

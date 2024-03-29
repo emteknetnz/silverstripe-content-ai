@@ -7,16 +7,12 @@ import { loadComponent } from 'lib/Injector';
 
 jQuery.entwine('ss', ($) => {
 
-  console.log('entwine'); // delete
-
   $('.js-injector-boot .entwine-chatgpt-field').entwine({
 
     Component: null,
     Root: null,
 
     onmatch() {
-      console.log('onmatch'); // delete
-
       const cmsContent = this.closest('.cms-content').attr('id');
       const context = (cmsContent)
         ? { context: cmsContent }

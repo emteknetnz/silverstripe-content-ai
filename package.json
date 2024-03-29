@@ -9,7 +9,9 @@
     "dev": "NODE_ENV=development webpack --progress",
     "watch": "NODE_ENV=development webpack --watch --progress",
     "test": "jest",
-    "lint": "yarn lint-js && yarn lint-sass"
+    "lint": "yarn lint-js && yarn lint-sass",
+    "lint-js": "eslint client/src",
+    "lint-sass": "sass-lint client/src"
   },
   "jest": {
     "testEnvironment": "jsdom",

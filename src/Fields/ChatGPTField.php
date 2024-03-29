@@ -25,7 +25,8 @@ class ChatGPTField extends TextareaField
 
     public function Field($properties = [])
     {
-        Requirements::javascript('emteknetnz/silverstripe-content-ai:client/js/bundle.js');
+        Requirements::javascript('emteknetnz/silverstripe-content-ai:client/dist/js/bundle.js');
+        Requirements::css('emteknetnz/silverstripe-content-ai:client/dist/styles/bundle.css');
         return parent::Field($properties);
     }
 

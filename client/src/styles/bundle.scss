@@ -1,0 +1,10 @@
+// Variables
+// See includePaths in webpack.config.js
+@import "variables";
+
+// Thirdparty
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+
+@import "../components/ChatGPTField/ChatGPTField";
