@@ -4,28 +4,32 @@ namespace emteknetnz\ContentAI\Services;
 
 use SilverStripe\Core\Environment;
 use Exception;
+use GuzzleHttp\Client;
 
 class ChatGPTService
 {
     public function makeRequest(string $content): string
     {
         $key = $this->getKey();
+        $content = $this->sanitiseContent($content);
         $prompt = $this->createPrompt($content);
-        // todo use guzzle, get error codes etc
-        $cmd = <<<EOT
-        curl https://api.openai.com/v1/chat/completions \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer $key" \
-        -d '{
-           "model": "gpt-3.5-turbo",
-           "messages": [{"role": "user", "content": "$prompt"}],
-           "temperature": 0.7
-         }'
-        EOT;
-        $cmd = trim($cmd);
-        $output = shell_exec($cmd);
+        // create request with guzzle
+        $client = new Client(['base_uri' => 'https://api.openai.com/']);
+        $response = $client->post('v1/chat/completions', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => "Bearer $key",
+            ],
+            'json' => [
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+                'temperature' => 0.7
+            ],
+        ]);
+        $output = $response->getBody()->getContents();
         $json = json_decode($output, true);
-        return $json['choices'][0]['message']['content'];
+        $res = $json['choices'][0]['message']['content'];
+        return $res;
     }
 
     private function getKey(): string
@@ -36,6 +40,15 @@ class ChatGPTService
             throw new Exception('OPENAI_API_KEY environment key is not set');
         }
         return $key;
+    }
+
+    private function sanitiseContent(string $content): string
+    {
+        // Retain newlines
+        $content = str_replace("\n", '\n', $content);
+        // Remove non-printable characters - ASCII cars 0-31 + 127
+        $content = preg_replace('/[\x00-\x1F\x7F]/u', '', $content);
+        return trim($content);
     }
 
     private function createPrompt(string $content): string
@@ -65,7 +78,6 @@ class ChatGPTService
         return trim($prompt);
     }
 }
-
 /*
 { "id": "chatcmpl-97KapChX7pnjlyyrtfyx1kGfltApT", "object": "chat.completion", "created": 1711534483, "model": "gpt-3.5-turbo-0125", "choices": [ { "index": 0, "message": { "role": "assistant", "content": "This is a test!" }, "logprobs": null, "finish_reason": "stop" } ], "usage": { "prompt_tokens": 13, "completion_tokens": 5, "total_tokens": 18 }, "system_fingerprint": "fp_3bc1b5746c" }
 */
