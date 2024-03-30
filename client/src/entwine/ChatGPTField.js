@@ -48,7 +48,20 @@ jQuery.entwine('ss', ($) => {
     getProps() {
       const inputField = this.getInputField();
       return {
-        value: inputField.data('value'),
+        // doing this to what happens when a react component is loaded in
+        // a non-entwine context e.g. as an elemental block where there are all of
+        // there props that are just magically there (most people probably don't realise
+        // that they are there)
+        // ensure that a 'data-schema' and 'data-state' as set in FormField::getAttributes()
+        ...inputField.data('schema'),
+        ...inputField.data('state'),
+        ...{
+          data: {
+            ...inputField.data('schema').data,
+            ...inputField.data('state').data
+          },
+          onChange: this.handleChange.bind(this),
+        }
       };
     },
 

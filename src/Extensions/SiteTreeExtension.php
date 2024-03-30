@@ -9,6 +9,8 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextareaField;
 use emteknetnz\ContentAI\Services\ChatGPTService;
 use emteknetnz\ContentAI\Fields\ChatGPTField;
+use SilverStripe\Forms\TreeDropdownField;
+use SilverStripe\CMS\Model\SiteTree;
 
 class SiteTreeExtension extends Extension
 {
@@ -46,10 +48,14 @@ class SiteTreeExtension extends Extension
         );
 
         $fieldThree = new ChatGPTField('MyChatGPTField');
+        $fieldFour = new TreeDropdownField('MyTreeDropdownField', 'My Tree Dropdown Field', SiteTree::class);
 
         $fields->addFieldsToTab(
             'Root.QuickAI',
-            FieldList::create([$fieldThree])
+            FieldList::create([
+                $fieldThree,
+                // $fieldFour
+            ])
         );
     }
 
@@ -80,7 +86,7 @@ class SiteTreeExtension extends Extension
         $config->setOption('bold_style', '**');
         $config->setOption('header_style', 'atx');
         $html = $this->owner->Content;
-        $markdown = $converter->convert($html);
+        $markdown = $converter->convert($html ?? '');
         return $markdown;
     }
 }
