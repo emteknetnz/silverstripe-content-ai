@@ -3,11 +3,13 @@
 namespace emteknetnz\ContentAI\Services;
 
 use SilverStripe\Core\Environment;
-use Exception;
 use GuzzleHttp\Client;
+use SilverStripe\SiteConfig\SiteConfig;
 
 class ChatGPTService
 {
+    const DEFAULT_STYLE_GUIDE = "Friendly and conversational\nActive voice\nPlain english";
+
     public function makeRequest(string $content): string
     {
         $key = $this->getKey();
@@ -53,6 +55,8 @@ class ChatGPTService
 
     private function createPrompt(string $content): string
     {
+        // Friendly and conversational\nActive voice\nPlain english
+        $styleGuide = $this->getStyleGuide();
         $prompt = <<<EOT
         Original text:
         """
@@ -61,9 +65,7 @@ class ChatGPTService
 
         Voice and style guide:
         ```
-        1) Friendly and conversational
-        2) Active voice
-        3) Plain english
+        $styleGuide
         ```
 
         [Return only the main response. Remove pre-text and post-text.]
@@ -76,6 +78,22 @@ class ChatGPTService
         $prompt = str_replace('"', '\"', $prompt);
         $prompt = str_replace("\n", '\n', $prompt);
         return trim($prompt);
+    }
+
+    private function getStyleGuide(): string
+    {
+        $contentAIStyleGuide = SiteConfig::get()->first()?->ContentAIStyleGuide;
+        if (empty($contentAIStyleGuide)) {
+            $styleGuide = self::DEFAULT_STYLE_GUIDE;
+        }
+        $values = explode("\n", $contentAIStyleGuide);
+        $i = 1;
+        $styleGuide = implode("\n", array_map(function(string $value) use (&$i) {
+            $v = "$i) $value";
+            $i++;
+            return $v;
+        }, $values));
+        return $styleGuide;
     }
 }
 /*

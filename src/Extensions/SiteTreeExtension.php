@@ -47,7 +47,7 @@ class SiteTreeExtension extends Extension
             FieldList::create([$fieldOne, $fieldGen, $fieldTwo])
         );
 
-        $fieldThree = new ChatGPTField('MyChatGPTField');
+        $fieldThree = new ChatGPTField('MyChatGPTField', 'Quick ChatGPT Field');
         $fieldFour = new TreeDropdownField('MyTreeDropdownField', 'My Tree Dropdown Field', SiteTree::class);
 
         $fields->addFieldsToTab(
