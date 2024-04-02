@@ -1,7 +1,0 @@
-SilverStripe\CMS\Model\SiteTree:
-  extensions:
-    - emteknetnz\ContentAI\Extensions\SiteTreeExtension
-
-SilverStripe\SiteConfig\SiteConfig:
-  extensions:
-    - emteknetnz\ContentAI\Extensions\SiteConfigExtension

@@ -9,7 +9,7 @@ use Exception;
 
 class ChatGPTService
 {
-    const DEFAULT_STYLE_GUIDE = "Friendly and conversational\nActive voice\nPlain english";
+    public const DEFAULT_STYLE_GUIDE = "Friendly and conversational\nActive voice\nPlain english";
 
     public function makeRequest(string $content): string
     {
@@ -30,8 +30,8 @@ class ChatGPTService
                     'temperature' => 0.7
                 ],
             ]);
-        } catch (Exception $e) {
-            return "Sorry, there was an error. Please try again later.";
+        } catch (Exception) {
+            return "There was an error communicating with ChatGPT. Please try again later.";
         }
         $output = $response->getBody()->getContents();
         $json = json_decode($output, true);
@@ -87,7 +87,7 @@ class ChatGPTService
 
     private function getStyleGuide(): string
     {
-        $contentAIStyleGuide = SiteConfig::get()->first()?->ContentAIStyleGuide;
+        $contentAIStyleGuide = SiteConfig::get()->first()?->ContentAIStyleGuide ?? '';
         if (empty($contentAIStyleGuide)) {
             $styleGuide = self::DEFAULT_STYLE_GUIDE;
         }

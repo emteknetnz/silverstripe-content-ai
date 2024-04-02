@@ -1,0 +1,17 @@
+---
+Name: content-ai
+---
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    'emteknetnz/silverstripe-content-ai:client/dist/js/bundle.js':
+      defer: true
+  extra_requirements_css:
+    - 'emteknetnz/silverstripe-content-ai:client/dist/styles/bundle.css'
+
+SilverStripe\CMS\Model\SiteTree:
+  extensions:
+    - emteknetnz\ContentAI\Extensions\SiteTreeExtension
+
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - emteknetnz\ContentAI\Extensions\SiteConfigExtension

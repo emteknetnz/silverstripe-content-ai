@@ -7,6 +7,7 @@ use SilverStripe\Control\HTTPResponse;
 use emteknetnz\ContentAI\Services\ChatGPTService;
 use SilverStripe\Forms\FormField;
 use SilverStripe\View\Requirements;
+use SilverStripe\SiteConfig\SiteConfig;
 
 class ChatGPTField extends FormField
 {
@@ -15,19 +16,6 @@ class ChatGPTField extends FormField
     ];
 
     protected $schemaComponent = 'ChatGPTField';
-
-    // probably dont' need this
-    protected $schemaDataType = FormField::SCHEMA_DATA_TYPE_CUSTOM;
-
-    // or this
-    protected $inputType = 'hidden';
-
-    public function Field($properties = [])
-    {
-        Requirements::javascript('emteknetnz/silverstripe-content-ai:client/dist/js/bundle.js');
-        Requirements::css('emteknetnz/silverstripe-content-ai:client/dist/styles/bundle.css');
-        return parent::Field($properties);
-    }
 
     public function query(HTTPRequest $request)
     {
@@ -59,7 +47,7 @@ class ChatGPTField extends FormField
         ];
     }
 
-    // this will show in the react component as props ... but only if it's not loaded by entwine
+    // this will show in the react component as props ... though not automatically if it's loaded by entwine
     // note that parent::getSchemaDataDefaults() will give a big stack of things like
     // 'disabled', 'readOnly', 'rightTitle', etc
     public function getSchemaDataDefaults()
@@ -67,7 +55,13 @@ class ChatGPTField extends FormField
         $data = parent::getSchemaDataDefaults();
         $data['data'] = array_merge($data['data'], [
             'queryUrl' => $this->Link('query'),
+            'styleGuide' => $this->getStyleGuide(),
         ]);
         return $data;
+    }
+
+    private function getStyleGuide(): string
+    {
+        return SiteConfig::get()->first()?->ContentAIStyleGuide ?? ChatGPTService::DEFAULT_STYLE_GUIDE;
     }
 }

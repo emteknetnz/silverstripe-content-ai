@@ -26,12 +26,17 @@ const ChatGPTField = (props) => {
       });
   };
 
-  // no-change-track is to prevent the 'unsaved changes' warning on navigate away
+  const styleGuide = props.data.styleGuide.replace(/\n/g, ', ');
 
+  // no-change-track is to prevent the 'unsaved changes' warning on navigate away
   return <div className="ChatGPTField no-change-track">
     <div>
       <strong>Paste in text here:</strong><br/>
       <Input type="textarea" rows="8" innerRef={textareaRef} />
+    </div>
+    <div>
+      <strong>Style guide: </strong>
+      {styleGuide}
     </div>
     <div>
       <Button color="warning" onClick={handleClick}>Generate alternate text</Button>
