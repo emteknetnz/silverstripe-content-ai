@@ -26,7 +26,9 @@ const ChatGPTField = (props) => {
       });
   };
 
-  return <div className="ChatGPTField">
+  // no-change-track is to prevent the 'unsaved changes' warning on navigate away
+
+  return <div className="ChatGPTField no-change-track">
     <div>
       <strong>Paste in text here:</strong><br/>
       <Input type="textarea" rows="8" innerRef={textareaRef} />

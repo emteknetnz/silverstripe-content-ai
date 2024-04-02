@@ -5,6 +5,7 @@ namespace emteknetnz\ContentAI\Services;
 use SilverStripe\Core\Environment;
 use GuzzleHttp\Client;
 use SilverStripe\SiteConfig\SiteConfig;
+use Exception;
 
 class ChatGPTService
 {
@@ -17,17 +18,21 @@ class ChatGPTService
         $prompt = $this->createPrompt($content);
         // create request with guzzle
         $client = new Client(['base_uri' => 'https://api.openai.com/']);
-        $response = $client->post('v1/chat/completions', [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Authorization' => "Bearer $key",
-            ],
-            'json' => [
-                'model' => 'gpt-3.5-turbo',
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'temperature' => 0.7
-            ],
-        ]);
+        try {
+            $response = $client->post('v1/chat/completions', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => "Bearer $key",
+                ],
+                'json' => [
+                    'model' => 'gpt-3.5-turbo',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'temperature' => 0.7
+                ],
+            ]);
+        } catch (Exception $e) {
+            return "Sorry, there was an error. Please try again later.";
+        }
         $output = $response->getBody()->getContents();
         $json = json_decode($output, true);
         $res = $json['choices'][0]['message']['content'];
