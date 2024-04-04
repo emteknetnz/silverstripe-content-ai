@@ -8,9 +8,14 @@ use emteknetnz\ContentAI\Services\ChatGPTService;
 use SilverStripe\Forms\FormField;
 use SilverStripe\View\Requirements;
 use SilverStripe\SiteConfig\SiteConfig;
+use Exception;
 
 class ChatGPTField extends FormField
 {
+    public const MODE_REWRITE_EXISTING_TEXT = 'rewrite-existing-text';
+
+    public const MODE_FREEFORM_PROMPT = 'freeform-prompt';
+
     private static $allowed_actions = [
         'query'
     ];
@@ -19,9 +24,10 @@ class ChatGPTField extends FormField
 
     public function query(HTTPRequest $request)
     {
+        $mode = $request->getVar('mode');
         $service = new ChatGPTService();
         $content = $request->getBody();
-        $result = $service->makeRequest($content);
+        $result = $service->makeRequest($content, $mode);
         return HTTPResponse::create()
             ->addHeader('Content-Type', 'text/plain')
             ->setBody($result);

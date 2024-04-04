@@ -2,6 +2,7 @@
 
 namespace emteknetnz\ContentAI\Services;
 
+use emteknetnz\ContentAI\Fields\ChatGPTField;
 use SilverStripe\Core\Environment;
 use GuzzleHttp\Client;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -11,11 +12,18 @@ class ChatGPTService
 {
     public const DEFAULT_STYLE_GUIDE = "Friendly and conversational\nActive voice\nPlain english";
 
-    public function makeRequest(string $content): string
+    public function makeRequest(string $content, string $mode): string
     {
         $key = $this->getKey();
         $content = $this->sanitiseContent($content);
-        $prompt = $this->createPrompt($content);
+        $systemPrompt = $this->createSystemPrompt();
+        if ($mode == ChatGPTField::MODE_REWRITE_EXISTING_TEXT) {
+            $userPrompt = $this->createUserPromptRewriteExistingText($content);
+        } elseif ($mode == ChatGPTField::MODE_FREEFORM_PROMPT) {
+            $userPrompt = $this->createUserPromptFreeformPrompt($content);
+        } else {
+            throw new Exception('Invalid mode');
+        }
         // create request with guzzle
         $client = new Client(['base_uri' => 'https://api.openai.com/']);
         try {
@@ -26,7 +34,11 @@ class ChatGPTService
                 ],
                 'json' => [
                     'model' => 'gpt-3.5-turbo',
-                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                    // 'model' => 'gpt-4',
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $userPrompt]
+                    ],
                     'temperature' => 0.7
                 ],
             ]);
@@ -58,28 +70,43 @@ class ChatGPTService
         return trim($content);
     }
 
-    private function createPrompt(string $content): string
+    private function createSystemPrompt(): string
     {
-        // Friendly and conversational\nActive voice\nPlain english
+        // This following will correctly tell me the voice and style guide when used as a user prompt:
+        // return 'Tell me what the "Voice and style guide" defined in the system prompt is';
         $styleGuide = $this->getStyleGuide();
+        $prompt = <<<EOT
+        You are an assistant that follows the following voice and style guide:
+        $styleGuide
+
+        You only return the main response and you always remove pre-text and post-text.
+        EOT;
+        $prompt = str_replace('"', '\"', $prompt);
+        $prompt = str_replace("\n", '\n', $prompt);
+        return trim($prompt);
+    }
+
+    private function createUserPromptRewriteExistingText(string $content): string
+    {
         $prompt = <<<EOT
         Original text:
         """
         $content
         """
 
-        Voice and style guide:
-        ```
-        $styleGuide
-        ```
-
-        [Return only the main response. Remove pre-text and post-text.]
-
         Do the following with the original text in the triple quotes block:
-        1) Make adjustments so that it follows the "Voice and style guide" defined in the triple tilde block
+        1) Make adjustments so that it follows the "Voice and style guide" defined in the system prompt
         2) Retain the same general structure and meaning
         3) Retain any examples or case-studies
         EOT;
+        $prompt = str_replace('"', '\"', $prompt);
+        $prompt = str_replace("\n", '\n', $prompt);
+        return trim($prompt);
+    }
+
+    private function createUserPromptFreeformPrompt(string $content): string
+    {
+        $prompt = $content;
         $prompt = str_replace('"', '\"', $prompt);
         $prompt = str_replace("\n", '\n', $prompt);
         return trim($prompt);
