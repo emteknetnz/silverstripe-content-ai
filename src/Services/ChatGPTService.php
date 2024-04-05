@@ -12,11 +12,11 @@ class ChatGPTService
 {
     public const DEFAULT_STYLE_GUIDE = "Friendly and conversational\nActive voice\nPlain english";
 
-    public function makeRequest(string $content, string $mode): string
+    public function makeRequest(string $content, string $mode, string $customStyleGuide): string
     {
         $key = $this->getKey();
         $content = $this->sanitiseContent($content);
-        $systemPrompt = $this->createSystemPrompt();
+        $systemPrompt = $this->createSystemPrompt($customStyleGuide);
         if ($mode == ChatGPTField::MODE_REWRITE_EXISTING_TEXT) {
             $userPrompt = $this->createUserPromptRewriteExistingText($content);
         } elseif ($mode == ChatGPTField::MODE_FREEFORM_PROMPT) {
@@ -70,11 +70,11 @@ class ChatGPTService
         return trim($content);
     }
 
-    private function createSystemPrompt(): string
+    private function createSystemPrompt(string $customStyleGuide): string
     {
         // This following will correctly tell me the voice and style guide when used as a user prompt:
         // return 'Tell me what the "Voice and style guide" defined in the system prompt is';
-        $styleGuide = $this->getStyleGuide();
+        $styleGuide = $this->getStyleGuide($customStyleGuide);
         $prompt = <<<EOT
         You are an assistant that follows the following voice and style guide:
         $styleGuide
@@ -112,13 +112,19 @@ class ChatGPTService
         return trim($prompt);
     }
 
-    private function getStyleGuide(): string
+    private function getStyleGuide(string $customStyleGuide): string
     {
-        $contentAIStyleGuide = SiteConfig::get()->first()?->ContentAIStyleGuide ?? '';
-        if (empty($contentAIStyleGuide)) {
+        if ($customStyleGuide) {
+            $styleGuide = $customStyleGuide;
+        } else {
+            $styleGuide = SiteConfig::get()->first()?->ContentAIStyleGuide ?? '';
+        }
+        if (empty($styleGuide)) {
             $styleGuide = self::DEFAULT_STYLE_GUIDE;
         }
-        $values = explode("\n", $contentAIStyleGuide);
+        // react component will use pipes to separate the lines
+        $styleGuide = str_replace('|', "\n", $styleGuide);
+        $values = explode("\n", $styleGuide);
         $i = 1;
         $styleGuide = implode("\n", array_map(function(string $value) use (&$i) {
             $v = "$i) $value";

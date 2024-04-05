@@ -24,10 +24,11 @@ class ChatGPTField extends FormField
 
     public function query(HTTPRequest $request)
     {
-        $mode = $request->getVar('mode');
+        $mode = $request->getVar('mode') ?: '';;
+        $customStyleGuide = $request->getVar('styleguide') ?: '';
         $service = new ChatGPTService();
         $content = $request->getBody();
-        $result = $service->makeRequest($content, $mode);
+        $result = $service->makeRequest($content, $mode, $customStyleGuide);
         return HTTPResponse::create()
             ->addHeader('Content-Type', 'text/plain')
             ->setBody($result);

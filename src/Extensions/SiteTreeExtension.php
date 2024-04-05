@@ -72,7 +72,7 @@ class SiteTreeExtension extends Extension
         }
         $service = new ChatGPTService();
         $content = $this->getContentAsMarkdown();
-        $output = $service->makeRequest($content);
+        $output = $service->makeRequest($content, ChatGPTField::MODE_REWRITE_EXISTING_TEXT);
         $this->owner->ContentAITwo = $output;
     }
 
