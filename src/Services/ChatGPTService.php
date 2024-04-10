@@ -27,6 +27,7 @@ class ChatGPTService
         // create request with guzzle
         $client = new Client(['base_uri' => 'https://api.openai.com/']);
         try {
+            // https://platform.openai.com/docs/api-reference/chat/create
             $response = $client->post('v1/chat/completions', [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -39,7 +40,8 @@ class ChatGPTService
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user', 'content' => $userPrompt]
                     ],
-                    'temperature' => 0.7
+                    // a temperature of 1 means that there's lots of randomness between responses
+                    'temperature' => 1,
                 ],
             ]);
         } catch (Exception) {

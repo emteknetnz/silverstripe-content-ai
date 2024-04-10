@@ -21,6 +21,9 @@ const ChatGPTField = (props) => {
     if (useCustomStyleGuide) {
       let styleguide = customStyleGuideRef.current.value;
       if (styleguide) {
+        // remove leading bullet points from each line
+        const styleguideList = styleguide.split('\n');
+        styleguide = styleguideList.map((item) => item.replace(/^[\*\-] */, '')).join('\n');
         styleguide = styleguide
           .replaceAll('\n', '|')
           .replaceAll('||', '|')
@@ -56,12 +59,13 @@ const ChatGPTField = (props) => {
   };
 
   const styleGuide = props.data.styleGuide.replace(/\n/g, ', ');
+  const styleGuideList = styleGuide.split(',').map((item) => <li>{item}</li>);
 
   let text = '';
   if (mode === 'rewrite-existing-text') {
-    text = 'Paste in text below to apply the style guide to it';
+    text = <div>Apply the style guide to text entered below</div>;
   } else if (mode === 'freeform-prompt') {
-    text = 'Ask ChatGPT to do something for you, the results will have the style guide applied to it';
+    text = <div>Ask ChatGPT to do something for you. The results will have the style guide applied to it</div>;
   }
 
   // no-change-track is to prevent the 'unsaved changes' warning on navigate away
@@ -71,13 +75,14 @@ const ChatGPTField = (props) => {
       { createButton('Rewrite text', 'rewrite-existing-text') }
       { createButton('Freeform prompt', 'freeform-prompt') }
     </div>
-    <div>{text}</div>
+    {text}
     <div>
       <Input type="textarea" rows="6" innerRef={textareaRef} />
     </div>
     <div>
-      <strong>Default style guide: </strong>
-      {styleGuide}
+      <strong>Default style guide:</strong>
+      <ul>{styleGuideList}</ul>
+      <div className="ChatGPTField__edit-style-guide">Administrators can <a href="/admin/settings#Root_ContentAI" target="_blank">edit the default style guide</a></div>
     </div>
     <Form>
       <FormGroup check inline>
@@ -85,23 +90,23 @@ const ChatGPTField = (props) => {
         <Label check onClick={handleCheckboxChange}>Use custom style guide</Label>
       </FormGroup>
       <div style={{ display: useCustomStyleGuide ? 'block' : 'none' }}>
-        Enter your custom style guide rules seperated by line breaks. These rules will be used instead of the default style guide rules.
+        Enter your custom style guide rules seperated by line breaks.<br/>
+        These rules will be used instead of the default style guide rules.
         <Input type="textarea" rows="3" innerRef={customStyleGuideRef} />
       </div>
     </Form>
     <div>
       <Button color="warning" onClick={handleSubmit}>Submit</Button>
-    </div>
-    <div>
-      { querying && <span>Communicating with ChatGPT...</span> }
+      { (querying) && <span className="ChatGPTField__querying">Communicating with ChatGPT...</span> }
     </div>
     { reply && <div>
       <strong>Response from ChatGPT:</strong><br/>
       {/* Using an input so that line break are preserved.
       Note you cannot put <br> in here they render as plain text */}
       <Input type="textarea" rows="12" value={reply} readOnly="true" />
+      <br/>Submit again to get a different result.
     </div> }
-    { mode === 'rewrite-existing-text' && <div>
+    { mode === 'rewrite-existing-text' && <div className="ChatGPTField__sample-text">
       <strong>Sample text that could be optimised:</strong><br/>
       All information (including name and address details) contained in submissions will be made
       available to the public on the website unless you indicate that you would like all or part of

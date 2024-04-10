@@ -48,6 +48,7 @@ class SiteTreeExtension extends Extension
         );
 
         $fieldThree = new ChatGPTField('MyChatGPTField', 'Quick ChatGPT Field');
+        $fieldThree->setTitle('');
         $fieldFour = new TreeDropdownField('MyTreeDropdownField', 'My Tree Dropdown Field', SiteTree::class);
 
         $fields->addFieldsToTab(
@@ -72,7 +73,7 @@ class SiteTreeExtension extends Extension
         }
         $service = new ChatGPTService();
         $content = $this->getContentAsMarkdown();
-        $output = $service->makeRequest($content, ChatGPTField::MODE_REWRITE_EXISTING_TEXT);
+        $output = $service->makeRequest($content, ChatGPTField::MODE_REWRITE_EXISTING_TEXT, '');
         $this->owner->ContentAITwo = $output;
     }
 

@@ -7,4 +7,24 @@
   div {
     padding: 5px 0;
   }
+
+  ul {
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__querying {
+    display: inline-block;
+    color: #666;
+  }
+
+  &__edit-style-guide {
+    color: #666;
+    font-size: 80%;
+  }
+
+  &__sample-text {
+    color: #666;
+    font-size: 60%;
+  }
 }
