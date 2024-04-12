@@ -1,1 +1,34 @@
-#Form_EditForm_MyChatGPTField{display:none}.ChatGPTField div{padding:5px 0}.ChatGPTField ul{padding-left:1rem;margin-bottom:.5rem}.ChatGPTField__querying{display:inline-block;color:#666}.ChatGPTField__edit-style-guide{color:#666;font-size:80%}.ChatGPTField__sample-text{color:#666;font-size:60%}
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[0].use[2]!./node_modules/resolve-url-loader/index.js??ruleSet[1].rules[0].use[3]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[0].use[4]!./client/src/styles/bundle.scss ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************/
+#Form_EditForm_MyChatGPTField {
+  display: none;
+}
+
+.ChatGPTField div {
+  padding: 5px 0;
+}
+.ChatGPTField ul {
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+.ChatGPTField__querying {
+  display: inline-block;
+  color: #666;
+}
+.ChatGPTField__edit-style-guide {
+  color: #666;
+  font-size: 80%;
+}
+.ChatGPTField__sample-text {
+  color: #666;
+  font-size: 60%;
+}
+.ChatGPTField--cms-main {
+  position: absolute;
+  bottom: 0;
+  background-color: yellow;
+  z-index: 1000;
+}
+
+/*# sourceMappingURL=bundle.css.map*/

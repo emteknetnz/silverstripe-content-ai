@@ -16,7 +16,7 @@ class SiteConfigExtension extends Extension
 
     public function updateCMSFields(FieldList $fields): void
     {
-        $values = explode("\n", $this->getOwner()->ContentAIStyleGuide);
+        $values = explode("\n", $this->getOwner()->ContentAIStyleGuide ?? '');
         $field = CompositeField::create(new FieldList([
             TextField::create('ContentAIRuleOne', 'Rule #1', $values[0] ?? ''),
             TextField::create('ContentAIRuleTwo', 'Rule #2', $values[1] ?? ''),
