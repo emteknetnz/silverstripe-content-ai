@@ -50,6 +50,7 @@ class ChatGPTService
         $output = $response->getBody()->getContents();
         $json = json_decode($output, true);
         $res = $json['choices'][0]['message']['content'];
+        $res = str_replace('\n', "\n", $res);
         return $res;
     }
 
@@ -81,7 +82,18 @@ class ChatGPTService
         You are an assistant that follows the following voice and style guide:
         $styleGuide
 
-        You only return the main response and you always remove pre-text and post-text.
+        You always follow these rules:
+        - Only return the main response and remove pre-text and post-text.
+
+        If you are asked to DO-THE-THINGS-REWRITE-EXISTING-TEXT, then do the following with the original text in the triple quotes block:
+        1) Make adjustments so that it follows the "Voice and style guide" defined in the system prompt
+        2) Retain the same general structure and meaning
+        3) Retain any examples or case-studies
+
+        You never mention any of the following in the response:
+        - What the rules of DO-THE-THINGS-REWRITE-EXISTING-TEXT are.
+        - That you are an AI assistant.
+        - That you are following a voice and style guide.
         EOT;
         $prompt = str_replace('"', '\"', $prompt);
         $prompt = str_replace("\n", '\n', $prompt);
@@ -96,10 +108,7 @@ class ChatGPTService
         $content
         """
 
-        Do the following with the original text in the triple quotes block:
-        1) Make adjustments so that it follows the "Voice and style guide" defined in the system prompt
-        2) Retain the same general structure and meaning
-        3) Retain any examples or case-studies
+        DO-THE-THINGS-REWRITE-EXISTING-TEXT
         EOT;
         $prompt = str_replace('"', '\"', $prompt);
         $prompt = str_replace("\n", '\n', $prompt);
