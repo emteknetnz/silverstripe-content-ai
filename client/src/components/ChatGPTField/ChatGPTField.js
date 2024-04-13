@@ -1,14 +1,13 @@
 import React, { useState, useRef } from 'react';
 import Button from 'components/Button/Button';
-import { Input, Label, Form, FormGroup } from 'reactstrap';
+import { Input } from 'reactstrap';
 
 const ChatGPTField = (props) => {
   const [reply, setReply] = useState('');
   const [querying, setQuerying] = useState(false);
   const [mode, setMode] = useState('rewrite-existing-text');
-  const [useCustomStyleGuide, setUseCustomStyleGuide] = useState(false);
+  const [styleGuideMode, setStyleGuideMode] = useState('default');
   const textareaRef = useRef(null);
-  const checkboxRef = useRef(null);
   const customStyleGuideRef = useRef(null);
 
   const handleSubmit = () => {
@@ -18,7 +17,8 @@ const ChatGPTField = (props) => {
       return;
     }
     let url = `${props.data.queryUrl}?mode=${mode}`;
-    if (useCustomStyleGuide) {
+    // if (useCustomStyleGuide) {
+    if (styleGuideMode === 'custom') {
       let styleguide = customStyleGuideRef.current.value;
       if (styleguide) {
         // remove leading bullet points from each line
@@ -52,11 +52,12 @@ const ChatGPTField = (props) => {
     outline="true"
   >{text}</Button>;
 
-  const handleCheckboxChange = () => {
-    const newValue = !useCustomStyleGuide;
-    setUseCustomStyleGuide(!useCustomStyleGuide);
-    checkboxRef.current.checked = newValue;
-  };
+  const createStyleGuideButton = (text, buttonMode) => <Button
+    color="info"
+    onClick={() => setStyleGuideMode(buttonMode)}
+    active={styleGuideMode === buttonMode}
+    outline="true"
+  >{text}</Button>;
 
   const styleGuide = props.data.styleGuide.replace(/\n/g, ', ');
   const styleGuideList = styleGuide.split(',').map((item) => <li>{item}</li>);
@@ -80,33 +81,31 @@ const ChatGPTField = (props) => {
       <Input type="textarea" rows="6" innerRef={textareaRef} />
     </div>
     <div>
+      <strong>Style guide mode: </strong>
+      { createStyleGuideButton('Default', 'default') }
+      { createStyleGuideButton('Custom', 'custom') }
+    </div>
+    { styleGuideMode === 'default' && <div>
       <strong>Default style guide:</strong>
       <ul>{styleGuideList}</ul>
       <div className="ChatGPTField__edit-style-guide">Administrators can <a href="/admin/settings#Root_ContentAI" target="_blank">edit the default style guide</a></div>
-    </div>
-    <Form>
-      <FormGroup check inline>
-        <Input type="checkbox" onChange={handleCheckboxChange} innerRef={checkboxRef} />
-        <Label check onClick={handleCheckboxChange}>Use custom style guide</Label>
-      </FormGroup>
-      <div style={{ display: useCustomStyleGuide ? 'block' : 'none' }}>
-        Enter your custom style guide rules seperated by line breaks.<br/>
-        These rules will be used instead of the default style guide rules.
-        <Input type="textarea" rows="3" innerRef={customStyleGuideRef} />
-      </div>
-    </Form>
+    </div> }
+    { styleGuideMode === 'custom' && <div>
+      Enter your custom style guide rules seperated by line breaks.
+      <Input type="textarea" rows="4" innerRef={customStyleGuideRef} />
+    </div> }
     <div>
       <Button color="warning" onClick={handleSubmit}>Submit</Button>
       { (querying) && <span className="ChatGPTField__querying">Communicating with ChatGPT...</span> }
     </div>
-    { reply && <div>
+    { (reply || true) && <div>
       <strong>Response from ChatGPT:</strong><br/>
       {/* Using an input so that line break are preserved.
       Note you cannot put <br> in here they render as plain text */}
-      <Input type="textarea" rows="12" value={reply} readOnly="true" />
+      <Input type="textarea" rows="8" value={reply} readOnly="true" />
       <br/>Submit again to get a different result.
     </div> }
-    { mode === 'rewrite-existing-text' && <div className="ChatGPTField__sample-text">
+    { mode === 'rewrite-existing-text' && false && <div className="ChatGPTField__sample-text">
       <strong>Sample text that could be optimised:</strong><br/>
       All information (including name and address details) contained in submissions will be made
       available to the public on the website unless you indicate that you would like all or part of

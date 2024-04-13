@@ -4,4 +4,5 @@
  import/no-unresolved
  */
 import 'boot';
-import 'entwine/ChatGPTField.entwine.js';
+import 'entwine/ChatGPTField.entwine';
+import 'entwine/ChatGPTField.global';

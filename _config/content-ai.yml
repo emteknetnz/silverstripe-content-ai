@@ -15,7 +15,3 @@ SilverStripe\CMS\Model\SiteTree:
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - emteknetnz\ContentAI\Extensions\SiteConfigExtension
-
-SilverStripe\CMS\Controllers\CMSMain:
-  extensions:
-    - emteknetnz\ContentAI\Extensions\CMSMainExtension
