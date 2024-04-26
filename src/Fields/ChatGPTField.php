@@ -10,6 +10,9 @@ use SilverStripe\View\Requirements;
 use SilverStripe\SiteConfig\SiteConfig;
 use Exception;
 
+/**
+ * This is used by the 'page tab' version of the field
+ */
 class ChatGPTField extends FormField
 {
     public const MODE_REWRITE_EXISTING_TEXT = 'rewrite-existing-text';
@@ -57,15 +60,15 @@ class ChatGPTField extends FormField
     // this will show in the react component as props ... though not automatically if it's loaded by entwine
     // note that parent::getSchemaDataDefaults() will give a big stack of things like
     // 'disabled', 'readOnly', 'rightTitle', etc
-    public function getSchemaDataDefaults()
-    {
-        $data = parent::getSchemaDataDefaults();
-        $data['data'] = array_merge($data['data'], [
-            'queryUrl' => $this->Link('query'),
-            'styleGuide' => $this->getStyleGuide(),
-        ]);
-        return $data;
-    }
+    // public function getSchemaDataDefaults()
+    // {
+    //     $data = parent::getSchemaDataDefaults();
+    //     $data['data'] = array_merge($data['data'], [
+    //         'queryUrl' => $this->Link('query'),
+    //         'styleGuide' => $this->getStyleGuide(),
+    //     ]);
+    //     return $data;
+    // }
 
     private function getStyleGuide(): string
     {

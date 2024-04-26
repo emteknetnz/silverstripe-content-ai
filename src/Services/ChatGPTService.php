@@ -12,11 +12,15 @@ class ChatGPTService
 {
     public const DEFAULT_STYLE_GUIDE = "Friendly and conversational\nActive voice\nPlain english";
 
-    public function makeRequest(string $content, string $mode, string $customStyleGuide): string
-    {
+    public function makeRequest(
+        string $content,
+        string $mode,
+        string $customStyleGuide,
+        string $contextMode
+    ): string {
         $key = $this->getKey();
         $content = $this->sanitiseContent($content);
-        $systemPrompt = $this->createSystemPrompt($customStyleGuide);
+        $systemPrompt = $this->createSystemPrompt($customStyleGuide, $contextMode);
         if ($mode == ChatGPTField::MODE_REWRITE_EXISTING_TEXT) {
             $userPrompt = $this->createUserPromptRewriteExistingText($content);
         } elseif ($mode == ChatGPTField::MODE_FREEFORM_PROMPT) {
@@ -73,11 +77,18 @@ class ChatGPTService
         return trim($content);
     }
 
-    private function createSystemPrompt(string $customStyleGuide): string
+    private function createSystemPrompt(string $customStyleGuide, string $contextMode): string
     {
         // This following will correctly tell me the voice and style guide when used as a user prompt:
         // return 'Tell me what the "Voice and style guide" defined in the system prompt is';
         $styleGuide = $this->getStyleGuide($customStyleGuide);
+        $contextBit = '';
+        if ($contextMode) {
+            $contextBit = <<<EOT
+            When writing a reponse you always consider the following context:
+            $contextMode
+            EOT;
+        }
         $prompt = <<<EOT
         You are an assistant that follows the following voice and style guide:
         $styleGuide
@@ -94,6 +105,8 @@ class ChatGPTService
         - What the rules of DO-THE-THINGS-REWRITE-EXISTING-TEXT are.
         - That you are an AI assistant.
         - That you are following a voice and style guide.
+
+        $contextBit
         EOT;
         $prompt = str_replace('"', '\"', $prompt);
         $prompt = str_replace("\n", '\n', $prompt);

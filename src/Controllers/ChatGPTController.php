@@ -8,6 +8,9 @@ use emteknetnz\ContentAI\Services\ChatGPTService;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\SiteConfig\SiteConfig;
 
+/**
+ * This is used by the 'bottom right' version of the field which uses ChatGPTField.global.js
+ */
 class ChatGPTController extends LeftAndMain
 {
     private static string $url_segment = 'chatgpt';
@@ -18,11 +21,12 @@ class ChatGPTController extends LeftAndMain
 
     public function query(HTTPRequest $request)
     {
-        $mode = $request->getVar('mode') ?: '';;
+        $mode = $request->getVar('mode') ?: '';
         $customStyleGuide = $request->getVar('styleguide') ?: '';
+        $contextMode = $request->getVar('contextMode') ?: '';
         $service = new ChatGPTService();
         $content = $request->getBody();
-        $result = $service->makeRequest($content, $mode, $customStyleGuide);
+        $result = $service->makeRequest($content, $mode, $customStyleGuide, $contextMode);
         return HTTPResponse::create()
             ->addHeader('Content-Type', 'text/plain')
             ->setBody($result);
@@ -34,6 +38,7 @@ class ChatGPTController extends LeftAndMain
         $clientConfig['chatgpt'] = [
             'queryUrl' => $this->Link('query'),
             'styleGuide' => $this->getStyleGuide(),
+            'contexts' => $this->getContexts(),
         ];
         return $clientConfig;
     }
@@ -41,5 +46,10 @@ class ChatGPTController extends LeftAndMain
     private function getStyleGuide(): string
     {
         return SiteConfig::get()->first()?->ContentAIStyleGuide ?? ChatGPTService::DEFAULT_STYLE_GUIDE;
+    }
+
+    private function getContexts(): string
+    {
+        return SiteConfig::get()->first()?->ContentAIContexts ?? '';
     }
 }

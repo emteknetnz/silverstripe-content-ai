@@ -7,6 +7,7 @@ const ChatGPTField = (props) => {
   const [querying, setQuerying] = useState(false);
   const [mode, setMode] = useState('rewrite-existing-text');
   const [styleGuideMode, setStyleGuideMode] = useState('default');
+  const [contextMode, setContextMode] = useState('none');
   const textareaRef = useRef(null);
   const customStyleGuideRef = useRef(null);
 
@@ -17,7 +18,6 @@ const ChatGPTField = (props) => {
       return;
     }
     let url = `${props.data.queryUrl}?mode=${mode}`;
-    // if (useCustomStyleGuide) {
     if (styleGuideMode === 'custom') {
       let styleguide = customStyleGuideRef.current.value;
       if (styleguide) {
@@ -32,6 +32,9 @@ const ChatGPTField = (props) => {
           .replaceAll(/[\x00-\x1F\x7F]/gm, '');
         url += `&styleguide=${encodeURIComponent(styleguide)}`;
       }
+    }
+    if (contextMode !== 'none') {
+      url += `&contextMode=${encodeURIComponent(contextMode)}`;
     }
     setQuerying(true);
     fetch(url, {
@@ -59,8 +62,20 @@ const ChatGPTField = (props) => {
     outline="true"
   >{text}</Button>;
 
+  const createContextsButton = (text, buttonMode) => <Button
+    color="info"
+    onClick={() => setContextMode(buttonMode)}
+    active={contextMode === buttonMode}
+    outline="true"
+  >{text}</Button>;
+
   const styleGuide = props.data.styleGuide.replace(/\n/g, ', ');
   const styleGuideList = styleGuide.split(',').map((item) => <li>{item}</li>);
+
+  const createContextButtons = () => props.data.contexts.split('\n').map((context) => {
+    const text = context.substring(0, 10);
+    return createContextsButton(text, context);
+  });
 
   let text = '';
   if (mode === 'rewrite-existing-text') {
@@ -80,6 +95,13 @@ const ChatGPTField = (props) => {
     <div>
       <Input type="textarea" rows="6" innerRef={textareaRef} />
     </div>
+
+    <div>
+      <strong>Context mode:</strong>
+      { createContextsButton('None', 'none') }
+      { createContextButtons() }
+    </div>
+
     <div>
       <strong>Style guide mode: </strong>
       { createStyleGuideButton('Default', 'default') }
