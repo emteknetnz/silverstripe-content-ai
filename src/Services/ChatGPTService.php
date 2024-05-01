@@ -16,11 +16,10 @@ class ChatGPTService
         string $content,
         string $mode,
         string $customStyleGuide,
-        string $contextMode
     ): string {
         $key = $this->getKey();
         $content = $this->sanitiseContent($content);
-        $systemPrompt = $this->createSystemPrompt($customStyleGuide, $contextMode);
+        $systemPrompt = $this->createSystemPrompt($customStyleGuide);
         if ($mode == ChatGPTField::MODE_REWRITE_EXISTING_TEXT) {
             $userPrompt = $this->createUserPromptRewriteExistingText($content);
         } elseif ($mode == ChatGPTField::MODE_FREEFORM_PROMPT) {
@@ -28,11 +27,15 @@ class ChatGPTService
         } else {
             throw new Exception('Invalid mode');
         }
+        $messages = [];
+        $messages[] = ['role' => 'system', 'content' => $systemPrompt];
+        // insert any previous messages here
+        $messages[] = ['role' => 'user', 'content' => $userPrompt];
+        // 'role' => 'assistant'
         // create request with guzzle
         $client = new Client(['base_uri' => 'https://api.openai.com/']);
         try {
-            // https://platform.openai.com/docs/api-reference/chat/create
-            $response = $client->post('v1/chat/completions', [
+            $postData = [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => "Bearer $key",
@@ -40,22 +43,22 @@ class ChatGPTService
                 'json' => [
                     'model' => 'gpt-3.5-turbo',
                     // 'model' => 'gpt-4',
-                    'messages' => [
-                        ['role' => 'system', 'content' => $systemPrompt],
-                        ['role' => 'user', 'content' => $userPrompt]
-                    ],
+                    'messages' => $messages,
                     // a temperature of 1 means that there's lots of randomness between responses
                     'temperature' => 1,
                 ],
-            ]);
+            ];
+            // https://platform.openai.com/docs/api-reference/chat/create
+            $response = $client->post('v1/chat/completions', $postData);
         } catch (Exception) {
-            return "There was an error communicating with ChatGPT. Please try again later.";
+            return 'There was an error communicating with ChatGPT. Please try again later.';
         }
         $output = $response->getBody()->getContents();
         $json = json_decode($output, true);
-        $res = $json['choices'][0]['message']['content'];
-        $res = str_replace('\n', "\n", $res);
-        return $res;
+        $messages[] = $json['choices'][0]['message'];
+        // remove system message
+        $messages = array_slice($messages, 1);
+        return json_encode($messages, 448);
     }
 
     private function getKey(): string
@@ -74,21 +77,16 @@ class ChatGPTService
         $content = str_replace("\n", '\n', $content);
         // Remove non-printable characters - ASCII cars 0-31 + 127
         $content = preg_replace('/[\x00-\x1F\x7F]/u', '', $content);
-        return trim($content);
+        // Remove whitespace at the start and end, also double quotes
+        $content = trim($content, ' "');
+        return $content;
     }
 
-    private function createSystemPrompt(string $customStyleGuide, string $contextMode): string
+    private function createSystemPrompt(string $customStyleGuide): string
     {
         // This following will correctly tell me the voice and style guide when used as a user prompt:
         // return 'Tell me what the "Voice and style guide" defined in the system prompt is';
         $styleGuide = $this->getStyleGuide($customStyleGuide);
-        $contextBit = '';
-        if ($contextMode) {
-            $contextBit = <<<EOT
-            When writing a reponse you always consider the following context:
-            $contextMode
-            EOT;
-        }
         $prompt = <<<EOT
         You are an assistant that follows the following voice and style guide:
         $styleGuide
@@ -105,8 +103,6 @@ class ChatGPTService
         - What the rules of DO-THE-THINGS-REWRITE-EXISTING-TEXT are.
         - That you are an AI assistant.
         - That you are following a voice and style guide.
-
-        $contextBit
         EOT;
         $prompt = str_replace('"', '\"', $prompt);
         $prompt = str_replace("\n", '\n', $prompt);

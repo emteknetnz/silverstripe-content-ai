@@ -21,12 +21,12 @@ class ChatGPTController extends LeftAndMain
 
     public function query(HTTPRequest $request)
     {
-        $mode = $request->getVar('mode') ?: '';
-        $customStyleGuide = $request->getVar('styleguide') ?: '';
-        $contextMode = $request->getVar('contextMode') ?: '';
+        $json = json_decode($request->getBody(), true);
+        $content = $json['text'] ?? '';
+        $mode = $json['mode'] ?? '';
+        $customStyleGuide = $json['styleGuide'] ?? '';
         $service = new ChatGPTService();
-        $content = $request->getBody();
-        $result = $service->makeRequest($content, $mode, $customStyleGuide, $contextMode);
+        $result = $service->makeRequest($content, $mode, $customStyleGuide);
         return HTTPResponse::create()
             ->addHeader('Content-Type', 'text/plain')
             ->setBody($result);

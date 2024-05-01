@@ -7,9 +7,9 @@ const ChatGPTField = (props) => {
   const [querying, setQuerying] = useState(false);
   const [mode, setMode] = useState('rewrite-existing-text');
   const [styleGuideMode, setStyleGuideMode] = useState('default');
-  const [contextMode, setContextMode] = useState('none');
   const textareaRef = useRef(null);
   const customStyleGuideRef = useRef(null);
+  const followUpRef = useRef(null);
 
   const handleSubmit = () => {
     const text = textareaRef.current.value;
@@ -17,36 +17,41 @@ const ChatGPTField = (props) => {
       setReply('Please enter some text in the field above.');
       return;
     }
-    let url = `${props.data.queryUrl}?mode=${mode}`;
+    const url = `${props.data.queryUrl}`;
+    let styleGuide = '';
     if (styleGuideMode === 'custom') {
-      let styleguide = customStyleGuideRef.current.value;
-      if (styleguide) {
+      styleGuide = customStyleGuideRef.current.value;
+      if (styleGuide) {
         // remove leading bullet points from each line
-        const styleguideList = styleguide.split('\n');
-        styleguide = styleguideList.map((item) => item.replace(/^[\*\-] */, '')).join('\n');
-        styleguide = styleguide
+        const styleguideList = styleGuide.split('\n');
+        styleGuide = styleguideList.map((item) => item.replace(/^[\*\-] */, '')).join('\n');
+        styleGuide = styleGuide
           .replaceAll('\n', '|')
           .replaceAll('||', '|')
           // remove non-printable characters
           // eslint-disable-next-line no-control-regex
           .replaceAll(/[\x00-\x1F\x7F]/gm, '');
-        url += `&styleguide=${encodeURIComponent(styleguide)}`;
+        // url += `&styleguide=${encodeURIComponent(styleguide)}`;
       }
-    }
-    if (contextMode !== 'none') {
-      url += `&contextMode=${encodeURIComponent(contextMode)}`;
     }
     setQuerying(true);
     fetch(url, {
       method: 'POST',
-      body: text,
+      body: JSON.stringify({
+        mode,
+        text,
+        styleGuide,
+      }),
     })
-      .then(response => response.text())
-      .then(responseText => {
-        setReply(responseText);
+      .then(response => response.json())
+      .then(responseJson => {
+        const content = responseJson[responseJson.length - 1].content;
+        setReply(content);
         setQuerying(false);
       });
   };
+
+  const handleFollowUp = () => {};
 
   const createButton = (text, buttonMode) => <Button
     color="info"
@@ -62,20 +67,8 @@ const ChatGPTField = (props) => {
     outline="true"
   >{text}</Button>;
 
-  const createContextsButton = (text, buttonMode) => <Button
-    color="info"
-    onClick={() => setContextMode(buttonMode)}
-    active={contextMode === buttonMode}
-    outline="true"
-  >{text}</Button>;
-
   const styleGuide = props.data.styleGuide.replace(/\n/g, ', ');
   const styleGuideList = styleGuide.split(',').map((item) => <li>{item}</li>);
-
-  const createContextButtons = () => props.data.contexts.split('\n').map((context) => {
-    const text = context.substring(0, 10);
-    return createContextsButton(text, context);
-  });
 
   let text = '';
   if (mode === 'rewrite-existing-text') {
@@ -97,12 +90,6 @@ const ChatGPTField = (props) => {
     </div>
 
     <div>
-      <strong>Context mode:</strong>
-      { createContextsButton('None', 'none') }
-      { createContextButtons() }
-    </div>
-
-    <div>
       <strong>Style guide mode: </strong>
       { createStyleGuideButton('Default', 'default') }
       { createStyleGuideButton('Custom', 'custom') }
@@ -120,22 +107,18 @@ const ChatGPTField = (props) => {
       <Button color="warning" onClick={handleSubmit}>Submit</Button>
       { (querying) && <span className="ChatGPTField__querying">Communicating with ChatGPT...</span> }
     </div>
-    { (reply || true) && <div>
+    <div>
       <strong>Response from ChatGPT:</strong><br/>
       {/* Using an input so that line break are preserved.
       Note you cannot put <br> in here they render as plain text */}
       <Input type="textarea" rows="8" value={reply} readOnly="true" />
       <br/>Submit again to get a different result.
-    </div> }
-    { mode === 'rewrite-existing-text' && false && <div className="ChatGPTField__sample-text">
-      <strong>Sample text that could be optimised:</strong><br/>
-      All information (including name and address details) contained in submissions will be made
-      available to the public on the website unless you indicate that you would like all or part of
-      your submission to remain in confidence. Automatically generated confidentiality statements in
-      emails do not suffice for this purpose.<br/><br/>Respondents who would like part of their
-      submission to remain in confidence should provide this information marked as such in a separate
-      attachment.
-    </div> }
+    </div>
+    <div>
+      <strong>Follow up:</strong><br/>
+      <Input type="textarea" rows="2" innerRef={followUpRef} disabled={!reply} />
+      <Button color="warning" onClick={handleFollowUp}>Submit</Button>
+    </div>
   </div>;
 };
 
